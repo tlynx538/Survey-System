@@ -103,7 +103,7 @@ const analyticsData = async(req,res) => {
         let response_list = []
         for(let j=0; j<responses.length; j++)
         {
-            response_list.push(responses[i][j]);
+            response_list.push(responses[j][i]);
         }
         let question_answer = {question: questions[i], responses: response_list}
         response_arr.push(question_answer);
