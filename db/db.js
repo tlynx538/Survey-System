@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const AutoIncrement = require('mongoose-sequence')(mongoose);
 let Schema = mongoose.Schema;
 
 let SurveySchema = new Schema ({
@@ -22,9 +21,6 @@ let UserSchema = new Schema ({
     credits: Number 
 })
 
-
-// SurveySchema.plugin(AutoIncrement, {survey_id: 'id'})
-// UserSubmittedSurveySchema.plugin(AutoIncrement, {response_id: 'id'})
 let SurveyModel = mongoose.model('Survey',SurveySchema);
 let UserSubmittedSurveyModel = mongoose.model('UserSubmittedResponses', UserSubmittedSurveySchema);
 let UsersModel = mongoose.model('Users',UserSchema);

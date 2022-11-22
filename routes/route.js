@@ -7,5 +7,5 @@ router.post('/survey/add',controller.submitSurvey);
 router.post('/survey/response/submit',controller.submitSurveyResponse);
 router.post('/create/user', controller.CreateUser);
 router.post('/credit/set',controller.setCredit);
-router.post('/analytics/survey/:survey_id',controller.analyticsData);
+router.get('/analytics/survey/:survey_id',controller.analyticsData);
 module.exports = router;
