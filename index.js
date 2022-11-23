@@ -2,7 +2,7 @@ let express = require('express');
 const routes = require('./routes/route');
 let rateLimit = require('express-rate-limit');
 let logger = require('morgan');
-let port = 8000;
+let port = 5000;
 
 const limiter = rateLimit({
     max: 25,
