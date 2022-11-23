@@ -1,13 +1,13 @@
 {
   "name": "survey-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "A REST API Server for Creating and Responding to Surveys",
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Vinayak Jaiwant",
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.2",
