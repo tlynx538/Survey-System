@@ -60,13 +60,13 @@ const submitSurveyResponse = async(req,res) => {
             }
             else 
             {
-                return res.status(400).json("message: Please Check if the Options are Correct or not")
+                return res.status(400).json({message: "Please Check if the Options are Correct or not"})
             }
         }
     }
     else 
     {
-        return res.status(400).json("message: User Has Already Submitted Response")
+        return res.status(400).json({message: "User Has Already Submitted Response"})
     }       
 }
 
@@ -100,7 +100,7 @@ const analyticsData = async(req,res) => {
     let questions = survey["questions"];
     for(let i=0; i<questions.length; i++ )
     {
-        let response_list = []
+        let response_list = [];
         for(let j=0; j<responses.length; j++)
         {
             response_list.push(responses[j][i]);
