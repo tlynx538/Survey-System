@@ -16,7 +16,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use('/api/',routes);
-
+app.get('/', (req, res) => {
+    res.status(200).json({message: "Welcome to the Survey System API"});
+  })
 app.listen(port, function(req,res){
   console.log(`The API is listening on http://localhost:${port}`);
 })
