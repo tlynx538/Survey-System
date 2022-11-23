@@ -1,8 +1,9 @@
+require('dotenv').config()
 let express = require('express');
 const routes = require('./routes/route');
 let rateLimit = require('express-rate-limit');
 let logger = require('morgan');
-let port = 8080;
+let port = process.env.PORT;
 
 const limiter = rateLimit({
     max: 25,
