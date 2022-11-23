@@ -31,43 +31,46 @@ const submitSurvey = (req,res) => {
 }
 
 const submitSurveyResponse = async(req,res) => {
-    let check =  await checkIfUserHasSubmittedResponse(req.body.user_id, req.body.survey_id);
-    if(!check)
+    if(await checkIfUserExists(req.body.user_id) != null)
     {
-        const survey = await retrieveSurveyById(req.body.survey_id);
-        if(survey == null)
-            return res.status(404).json({message: "No Such Survey Available"})
-        else 
+        let check =  await checkIfUserHasSubmittedResponse(req.body.user_id, req.body.survey_id);
+        if(!check)
         {
-            const validation_result = surveyFormValidation(survey["questions"],req.body.questions);
-            if(validation_result)
-            {
-                let Survey = new UserSubmittedSurveyModel({
-                    response_date: getTimeStamp(),
-                    user_id : mongoose.Types.ObjectId(req.body.user_id),
-                    survey_id : mongoose.Types.ObjectId(req.body.survey_id),
-                    questions : req.body.questions 
-                })
-                Survey.save(async (err, survey) => {
-                    if(err)
-                        return res.status(500).json(throwErrorMessage(err));
-                    else 
-                    {
-                        await UpdateCreditbyUserId(req.body.user_id);
-                        return res.status(200).json({message: "Survey Response Added Successfully", result: survey});
-                    }
-                })
-            }
+            const survey = await retrieveSurveyById(req.body.survey_id);
+            if(survey == null)
+                return res.status(404).json({message: "No Such Survey Available"})
             else 
             {
-                return res.status(400).json({message: "Please Check if the Options are Correct or not"})
+                const validation_result = surveyFormValidation(survey["questions"],req.body.questions);
+                if(validation_result)
+                {
+                    let Survey = new UserSubmittedSurveyModel({
+                        response_date: getTimeStamp(),
+                        user_id : mongoose.Types.ObjectId(req.body.user_id),
+                        survey_id : mongoose.Types.ObjectId(req.body.survey_id),
+                        questions : req.body.questions 
+                    })
+                    Survey.save(async (err, survey) => {
+                        if(err)
+                            return res.status(500).json(throwErrorMessage(err));
+                        else 
+                        {
+                            await UpdateCreditbyUserId(req.body.user_id);
+                            return res.status(200).json({message: "Survey Response Added Successfully", result: survey});
+                        }
+                    })
+                }
+                else 
+                {
+                    return res.status(400).json({message: "Please Check if the Options are Correct or not"})
+                }
             }
         }
-    }
-    else 
-    {
-        return res.status(400).json({message: "User Has Already Submitted Response"})
-    }       
+        else 
+        {
+            return res.status(400).json({message: "User Has Already Submitted Response"})
+        }   
+    }    
 }
 
 const CreateUser = (req,res) => {
@@ -95,20 +98,40 @@ const setCredit = (req,res) => {
 
 const analyticsData = async(req,res) => {
     let response_arr = []
-    const survey = await retrieveSurveyById(req.params.survey_id);
-    const responses = await retrieveSurveyResponsesBySurveyId(req.params.survey_id);
-    let questions = survey["questions"];
-    for(let i=0; i<questions.length; i++ )
+    try 
     {
-        let response_list = [];
-        for(let j=0; j<responses.length; j++)
+        const survey = await retrieveSurveyById(req.params.survey_id);
+        if(survey != false)
         {
-            response_list.push(responses[j][i]);
+            const responses = await retrieveSurveyResponsesBySurveyId(req.params.survey_id);
+            if(responses.length)
+            {
+                let questions = survey["questions"];
+                for(let i=0; i<questions.length; i++ )
+                {
+                    let response_list = [];
+                    for(let j=0; j<responses.length; j++)
+                    {
+                        response_list.push(responses[j][i]);
+                    }
+                    let question_answer = {question: questions[i], responses: response_list}
+                    response_arr.push(question_answer);
+                }
+                return res.status(200).json({response_data: response_arr});
+            }
+            else 
+            {
+                return res.status(400).json({message: "Responses for this Survey has not been submitted."})
+            }
         }
-        let question_answer = {question: questions[i], responses: response_list}
-        response_arr.push(question_answer);
+        else 
+            return res.status(400).json({message: "The Survey Does Not Exist."});
     }
-    return res.status(200).json({response_data: response_arr});
+    catch(err)
+    {
+        console.log(err);
+        return res.status(400).json({message: "The Survey Id does not exist"});
+    }
 }
 
 // Additional Functions
@@ -125,7 +148,9 @@ const UpdateCreditbyUserId = async(user_id) => {
     }
 }
 
-
+const checkIfUserExists = async(user_id) => {
+    return await UsersModel.findById(mongoose.Types.ObjectId(user_id)).exec();
+}
 const throwErrorMessage = (err) => {
     return {"message": "An Error has Occured", "Exception Message": err}
 }
@@ -135,7 +160,12 @@ const getTimeStamp = () => {
 }
 
 const retrieveSurveyById = async(survey_id) => {
-    return await SurveyModel.findById(survey_id).exec()
+    let results = await SurveyModel.findById(mongoose.Types.ObjectId(survey_id)).exec();
+    let results_length = Object.keys(results).length
+    if(results_length)
+        return results
+    else 
+        return false 
 }
 
 const retrieveSurveyResponsesBySurveyId = async(survey_id) => {
@@ -207,11 +237,12 @@ const checkIfElementExistsInArray = (array, value) =>
 
 const checkIfUserHasSubmittedResponse = async (user_id, survey_id) => {
     let results = await UserSubmittedSurveyModel.find({user_id: mongoose.Types.ObjectId(user_id), survey_id: mongoose.Types.ObjectId(survey_id)}).exec()
-    console.log(results);
-    if(results.length > 0)
+    let results_length = Object.keys(results).length 
+    if(results_length)
         return true;
     else 
         return false;
 }
+
 
 module.exports = {retrieveAllSurveys, submitSurvey, submitSurveyResponse, CreateUser, setCredit, analyticsData};

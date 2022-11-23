@@ -269,3 +269,7 @@ Sample Response :
     ]
 }
 ```
+
+Note: 
+1. There is a bug - especially on the checkIfUserExists function, especially if the result is null.
+2. The limiter, limits requests if there are 25 calls and will allow to accept requests only after 10 seconds  
